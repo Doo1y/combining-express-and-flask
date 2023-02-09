@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    image: nodeapp
+    ports:
+      - "80:8080"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - DB_USERNAME=dooly
+      - DB_PASSWORD=dinopassword
+      - DB_DATABASE=dinobase
+    volumes:
+      - .:/app
+    networks:
+      - pgnodeapp
+    depends_on:
+      - db
+    command: ./wait-for db:5432 -- npm run build-start
+  db:
+    image: postgres:12-alpine
+    environment:
+      - POSTGRES_PASSWORD=dinopassword
+      - POSTGRES_USER=dooly
+      - POSTGRES_DB=dinobase
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      pgnodeapp:
+        aliases:
+          - postgres
+
+networks:
+  pgnodeapp:
+    driver: bridge
+
+volumes:
+  db-data:
